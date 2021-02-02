@@ -14,7 +14,7 @@ namespace YgAndroidQQSniffer.TLVParser
 
         public static void RegTLVParsers()
         {
-            bool IsTLVParserAttrbute(Attribute[] o)
+            static bool IsTLVParserAttrbute(Attribute[] o)
             {
                 foreach (Attribute a in o)
                 {

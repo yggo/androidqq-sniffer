@@ -233,13 +233,11 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
 
             try
             {
-                using (MemoryStream compressedStream = new MemoryStream(HexUtil.DecodeHex(selected_text)))
-                using (DeflateStream deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
-                using (MemoryStream outputStream = new MemoryStream())
-                {
-                    deflateStream.CopyTo(outputStream);
-                    Frm.Log($"\n\n[{outputStream.ToArray().HexDump()}]\n\n");
-                }
+                using MemoryStream compressedStream = new MemoryStream(HexUtil.DecodeHex(selected_text));
+                using DeflateStream deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
+                using MemoryStream outputStream = new MemoryStream();
+                deflateStream.CopyTo(outputStream);
+                Frm.Log($"\n\n[{outputStream.ToArray().HexDump()}]\n\n");
                 /*using (var inputStream = new InflaterInputStream(compressedStream))
                 {
                     inputStream.CopyTo(outputStream);

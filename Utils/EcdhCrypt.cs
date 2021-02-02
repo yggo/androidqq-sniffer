@@ -54,7 +54,7 @@ namespace YgAndroidQQSniffer.Utils
 
         private byte[] PublicKey = new byte[1024];
         private byte[] PrivateKey = new byte[1024];
-        private byte[] ShareKey = new byte[16];
+        private readonly byte[] ShareKey = new byte[16];
         private const string SvrPubKey = "0440eaf325b9c66225143aa7f3961c953c3d5a8048c2b73293cdc7dcbab7f35c4c66aa8917a8fd511f9d969d02c8501bcaa3e3b11746f00567e3aea303ac5f2d25";
         public int Publen { get; private set; }
         public int Prilen { get; private set; }

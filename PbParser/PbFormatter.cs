@@ -9,35 +9,32 @@ namespace YgAndroidQQSniffer.PbParser
     {
         public string Parse(IByteBuffer value)
         {
-            using (Process process = new Process())
-            {
-                process.StartInfo.FileName = "cmd.exe";
-                // 是否使用操作系统shell启动
-                process.StartInfo.UseShellExecute = false;
-                // 接收来自调用程序的输入信息
-                process.StartInfo.RedirectStandardInput = true;
-                // 由调用程序获取输出信息
-                process.StartInfo.RedirectStandardOutput = true;
-                // 重定向标准错误输出
-                process.StartInfo.RedirectStandardError = true;
-                // 不显示程序窗口
-                process.StartInfo.CreateNoWindow = true;
+            using Process process = new Process();
+            process.StartInfo.FileName = "cmd.exe";
+            // 是否使用操作系统shell启动
+            process.StartInfo.UseShellExecute = false;
+            // 接收来自调用程序的输入信息
+            process.StartInfo.RedirectStandardInput = true;
+            // 由调用程序获取输出信息
+            process.StartInfo.RedirectStandardOutput = true;
+            // 重定向标准错误输出
+            process.StartInfo.RedirectStandardError = true;
+            // 不显示程序窗口
+            process.StartInfo.CreateNoWindow = true;
 
-                process.Start();
+            process.Start();
 
-                //process.StandardInput.WriteLine(@"C:\Users\yggo\Desktop\protoc.exe --decode_raw < G:\C#WorkSpace\EpointMsgReverse\bin\Debug\test.bin&exit");
-                process.StandardInput.WriteLine(@"C:\Users\yggo\Desktop\protoc.exe --decode_raw < " + WriteTmpBinFile(value) + "&exit");
+            //process.StandardInput.WriteLine(@"C:\Users\yggo\Desktop\protoc.exe --decode_raw < G:\C#WorkSpace\EpointMsgReverse\bin\Debug\test.bin&exit");
+            process.StandardInput.WriteLine(@"C:\Users\yggo\Desktop\protoc.exe --decode_raw < " + WriteTmpBinFile(value) + "&exit");
 
-                process.StandardInput.AutoFlush = true;
-                // Synchronously read the standard output of the spawned process.
-                StreamReader reader = process.StandardOutput;
-                string output = reader.ReadToEnd();
+            process.StandardInput.AutoFlush = true;
+            // Synchronously read the standard output of the spawned process.
+            StreamReader reader = process.StandardOutput;
+            string output = reader.ReadToEnd();
 
-                process.WaitForExit();
-                // Write the redirected output to this application's window.
-                return output;
-
-            }
+            process.WaitForExit();
+            // Write the redirected output to this application's window.
+            return output;
         }
 
         private string WriteTmpBinFile(IByteBuffer value)

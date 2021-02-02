@@ -30,7 +30,7 @@ namespace YgAndroidQQSniffer.HttpServer
         static readonly AsciiString DateEntity = HttpHeaderNames.Date;
         static readonly AsciiString ContentLengthEntity = HttpHeaderNames.ContentLength;
         static readonly AsciiString ServerEntity = HttpHeaderNames.Server;
-        static BlockingCollection<string> _keys = new BlockingCollection<string>();
+        static readonly BlockingCollection<string> _keys = new BlockingCollection<string>();
 
         static readonly string HookMethodName = "methodName";
         static readonly string HookMethodValue = "methodValue";

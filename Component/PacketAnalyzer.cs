@@ -86,7 +86,7 @@ namespace YgAndroidQQSniffer.Component
             int qq_len = Buf.ReadInt() - 4;
             Uin = Buf.ReadCharSequence(qq_len, Encoding.UTF8).ToString();
             byte[] remaining = Util.ReadRemainingBytes(Buf);
-            byte[] decrypt_data = Common.TeaKeyLogDecrypt(remaining, out DecryptionKey decryptionKey);
+            byte[] decrypt_data = Common.TeaKeyLogDecrypt(remaining, out _);
             if (decrypt_data == null) return;
             var buf_part1 = Unpooled.WrappedBuffer(decrypt_data);
             buf_part1.ReadInt();
@@ -204,7 +204,7 @@ namespace YgAndroidQQSniffer.Component
             int qq_len = Buf.ReadInt() - 4;
             Uin = Buf.ReadCharSequence(qq_len, Encoding.UTF8).ToString();
             byte[] remaining = Util.ReadRemainingBytes(Buf);
-            byte[] decrypt_data = Common.TeaKeyLogDecrypt(remaining, out DecryptionKey decryptionKey);
+            byte[] decrypt_data = Common.TeaKeyLogDecrypt(remaining, out _);
             if (decrypt_data == null) return;
             var buf_part1 = Unpooled.WrappedBuffer(decrypt_data);
             buf_part1.ReadInt();//head_size

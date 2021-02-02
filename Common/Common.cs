@@ -1,5 +1,4 @@
-﻿using App.Metrics.Concurrency;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using YgAndroidQQSniffer.Extension;
@@ -35,7 +34,6 @@ namespace YgAndroidQQSniffer
     }
     public class Common
     {
-        public static AtomicInteger Index;
 
         public static LinkedList<DecryptionKey> Keys { get; set; } = new LinkedList<DecryptionKey>();
 

@@ -1,5 +1,4 @@
-﻿using App.Metrics.Concurrency;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -97,7 +96,6 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
         private void DisplayPacketLogListView(string data)
         {
             Frm.lv_packet_log.Items.Clear();
-            Common.Index = new AtomicInteger();
 
             string[] rows = data.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             List<ListViewItem> lvs = new List<ListViewItem>();
@@ -115,7 +113,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
                     string payload = col[6];
                     lvs.Add(new ListViewItem()
                     {
-                        Text = Common.Index.Increment(1).ToString(),
+                        Text = index,
                         SubItems =
                         {
                             orientation,

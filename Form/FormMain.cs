@@ -1,5 +1,4 @@
-﻿using App.Metrics.Concurrency;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
 using NLog;
 using SharpPcap;
@@ -53,7 +52,7 @@ namespace YgAndroidQQSniffer
 
         private void RegCustomEvents()
         {
-            bool IsCustomEventAttrbute(Attribute[] o)
+            static bool IsCustomEventAttrbute(Attribute[] o)
             {
                 foreach (Attribute a in o)
                 {
@@ -299,7 +298,6 @@ namespace YgAndroidQQSniffer
         {
             if (Device == null || Device.Started) return;
             lv_packet_log.Items.Clear();
-            Common.Index = new AtomicInteger();
             Device.Open(DeviceMode.Normal, 1000);
             Device.Filter = "tcp port 8080 or tcp port 14000 or tcp port 443";
             Device.OnPacketArrival += new PacketArrivalEventHandler(Device_OnPacketArrival);
@@ -324,7 +322,6 @@ namespace YgAndroidQQSniffer
         private void Button_clear_packet_log_Click(object sender, EventArgs e)
         {
             lv_packet_log.Items.Clear();
-            Common.Index = new AtomicInteger(0);
         }
         private string _dstIp { get; set; }
         private void Device_OnPacketArrival(object sender, CaptureEventArgs e)
@@ -376,7 +373,7 @@ namespace YgAndroidQQSniffer
                                 _dstIp = dstIp.ToString();
                                 lv = new ListViewItem()
                                 {
-                                    Text = Common.Index.Increment(1).ToString(),
+                                    Text = (lv_packet_log.Items.Count + 1).ToString(),
                                     SubItems =
                                     {
                                         orientation,
@@ -406,7 +403,7 @@ namespace YgAndroidQQSniffer
                     {
                         lv = new ListViewItem()
                         {
-                            Text = Common.Index.Increment(1).ToString(),
+                            Text = (lv_packet_log.Items.Count + 1).ToString(),
                             SubItems =
                         {
                             orientation,

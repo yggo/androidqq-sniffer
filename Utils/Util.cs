@@ -137,33 +137,27 @@ namespace YgAndroidQQSniffer
         }
         public static string Md5(this string input)
         {
-            using (MD5 mi = MD5.Create())
+            using MD5 mi = MD5.Create();
+            byte[] buffer = Encoding.UTF8.GetBytes(input);
+            byte[] newBuffer = mi.ComputeHash(buffer);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < newBuffer.Length; i++)
             {
-                byte[] buffer = Encoding.UTF8.GetBytes(input);
-                byte[] newBuffer = mi.ComputeHash(buffer);
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < newBuffer.Length; i++)
-                {
-                    sb.Append(newBuffer[i].ToString("x2"));
-                }
-                return sb.ToString();
+                sb.Append(newBuffer[i].ToString("x2"));
             }
+            return sb.ToString();
         }
         public static byte[] Md5(this byte[] input)
         {
-            using (MD5 mi = MD5.Create())
-            {
-                return mi.ComputeHash(input);
-            }
+            using MD5 mi = MD5.Create();
+            return mi.ComputeHash(input);
         }
         public static byte[] GenerateMD5Byte(this string input)
         {
-            using (MD5 mi = MD5.Create())
-            {
-                byte[] buffer = Encoding.UTF8.GetBytes(input);
-                byte[] newBuffer = mi.ComputeHash(buffer);
-                return newBuffer;
-            }
+            using MD5 mi = MD5.Create();
+            byte[] buffer = Encoding.UTF8.GetBytes(input);
+            byte[] newBuffer = mi.ComputeHash(buffer);
+            return newBuffer;
         }
         public static Type[] GetExportedTypes(this Type assembly)
         {
