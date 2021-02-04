@@ -6,7 +6,8 @@ namespace YgAndroidQQSniffer.Tab
     [Attributes.CustomEvent(nameof(TabHttpServer))]
     public class TabHttpServer : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
+
         public void Register()
         {
             Frm.btn_start_httpserver.Click += new EventHandler(Btn_start_httpserver_ClickAsync);

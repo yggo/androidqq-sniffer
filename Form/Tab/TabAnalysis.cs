@@ -7,11 +7,12 @@ namespace YgAndroidQQSniffer.Tab
     [Attributes.CustomEvent(nameof(TabAnalysis))]
     public class TabAnalysis : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
+
         public void Register()
         {
-            Frm.copy_payload.Click += new EventHandler(CopyPayload_Click);
-            Frm.clear_analysis_listview.Click += new EventHandler(ClearAnalysisListView_Click);
+            Frm.copy_payload.Click += CopyPayload_Click;
+            Frm.clear_analysis_listview.Click += ClearAnalysisListView_Click;
         }
 
         #region ctx_menu_trace_flow

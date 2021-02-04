@@ -10,17 +10,17 @@ namespace YgAndroidQQSniffer.Tab
     [Attributes.CustomEvent(nameof(TabTool))]
     public class TabTool : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         public void Register()
         {
-            Frm.btn_tool_read_keys.Click += new EventHandler(Btn_tool_read_keys_Click);
-            Frm.btn_tool_save_keys.Click += new EventHandler(Btn_tool_save_keys_Click);
-            Frm.btn_tool_md5_calc.Click += new EventHandler(Btn_tool_md5_calc_Click);
-            Frm.btn_tool_md5_copy_once.Click += new EventHandler(Btn_tool_md5_copy_once_Click);
-            Frm.btn_tool_qqencrypt_calc.Click += new EventHandler(Btn_tool_qqencrypt_calc_Click);
-            Frm.btn_tool_qqencrypt_copy.Click += new EventHandler(Btn_tool_qqencrypt_copy_Click);
-            Frm.btn_tool_hookdata_showPwd.Click += new EventHandler(Btn_tool_hookdata_showPwd_Click);
+            Frm.btn_tool_read_keys.Click += Btn_tool_read_keys_Click;
+            Frm.btn_tool_save_keys.Click += Btn_tool_save_keys_Click;
+            Frm.btn_tool_md5_calc.Click += Btn_tool_md5_calc_Click;
+            Frm.btn_tool_md5_copy_once.Click += Btn_tool_md5_copy_once_Click;
+            Frm.btn_tool_qqencrypt_calc.Click += Btn_tool_qqencrypt_calc_Click;
+            Frm.btn_tool_qqencrypt_copy.Click += Btn_tool_qqencrypt_copy_Click;
+            Frm.btn_tool_hookdata_showPwd.Click += Btn_tool_hookdata_showPwd_Click;
         }
 
         #region TAB 工具

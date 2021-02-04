@@ -28,7 +28,7 @@ namespace YgAndroidQQSniffer
                 returnBytes[i] = Convert.ToByte(hexStr.Substring(i * 2, 2), 16);
             return returnBytes;
         }
-        public static string HexDump(this string hexStr) => HexDump(Unpooled.WrappedBuffer(HexUtil.DecodeHex(hexStr)));
+        public static string HexDump(this string hexStr) => HexDump(Unpooled.WrappedBuffer(hexStr.DecodeHex()));
         public static string HexDump(this byte[] array) => HexDump(Unpooled.WrappedBuffer(array));
         public static string HexDump(this IByteBuffer buffer)
         {

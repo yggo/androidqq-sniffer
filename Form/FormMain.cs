@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -21,7 +20,9 @@ namespace YgAndroidQQSniffer
     {
         public static FormMain Form { get; private set; }
 
-        public static Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
+        private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+
+        private RealTimePacketsAnalyzer RealTimePacketsAnalyzer { get; } = new RealTimePacketsAnalyzer();
 
         public FormMain()
         {
@@ -110,6 +111,7 @@ namespace YgAndroidQQSniffer
             Clipboard.SetText(text);
             r_txt_log.Paste();
             Clipboard.SetText(old_text);
+            r_txt_log.Select(old_start + old_length, 0);
         }
         public void Log(string text, params object[] args)
         {
@@ -121,7 +123,7 @@ namespace YgAndroidQQSniffer
         /// <summary>
         /// 当前下拉框选中的网卡
         /// </summary>
-        private ICaptureDevice Device { get; set; }
+        public ICaptureDevice Device { get; set; }
         /// <summary>
         /// 当前下拉框选中的网卡的IP
         /// </summary>
@@ -300,8 +302,9 @@ namespace YgAndroidQQSniffer
             lv_packet_log.Items.Clear();
             Device.Open(DeviceMode.Normal, 1000);
             Device.Filter = "tcp port 8080 or tcp port 14000 or tcp port 443";
-            Device.OnPacketArrival += new PacketArrivalEventHandler(Device_OnPacketArrival);
+            Device.OnPacketArrival += Device_OnPacketArrival;
             Device.StartCapture();
+            RealTimePacketsAnalyzer.StartAnalysisThread();
         }
 
         private void Button_stop_capture_Click(object sender, EventArgs e)
@@ -310,12 +313,14 @@ namespace YgAndroidQQSniffer
             {
                 try
                 {
-                    _dstIp = null;
                     Device.OnPacketArrival -= new PacketArrivalEventHandler(Device_OnPacketArrival);
                     Device.StopCapture();
                     Device.Close();
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // ignored
+                }
             }
         }
 
@@ -323,247 +328,17 @@ namespace YgAndroidQQSniffer
         {
             lv_packet_log.Items.Clear();
         }
-        private string _dstIp { get; set; }
+
         private void Device_OnPacketArrival(object sender, CaptureEventArgs e)
         {
-            var time = e.Packet.Timeval.Date.ToLocalTime();
-            var len = e.Packet.Data.Length;
+            var captureTime = e.Packet.Timeval.Date.ToLocalTime();
             var packet = PacketDotNet.Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var tcpPacket = packet.Extract<PacketDotNet.TcpPacket>();
 
+
             if (tcpPacket != null)
             {
-                var ipPacket = (PacketDotNet.IPPacket)tcpPacket.ParentPacket;
-                IPAddress srcIp = ipPacket.SourceAddress;
-                IPAddress dstIp = ipPacket.DestinationAddress;
-                int srcPort = tcpPacket.SourcePort;
-                int dstPort = tcpPacket.DestinationPort;
-                string data = tcpPacket.PayloadData.HexDump();
-                int payload_len = tcpPacket.PayloadData.Length;
-
-                if (payload_len == 0 || data == "00") return;
-
-                string orientation = string.Empty;
-                if (srcIp.ToString() == SelectedDeviceIpAddr)
-                {
-                    orientation = "Send";
-                }
-                else
-                {
-                    orientation = "Recv";
-                }
-                ListViewItem lv = null;
-                if (_dstIp == null)
-                {
-                    //首次捕获
-                    var buf = Unpooled.WrappedBuffer(HexUtil.DecodeHex(data));
-                    try
-                    {
-                        if (buf.ReadableBytes < 9) return;
-                        byte[] tag = new byte[5];
-                        buf.GetBytes(buf.ReaderIndex + 4, tag, 0, 5);
-                        switch (tag.HexDump())
-                        {
-                            case "00 00 00 0A 00":
-                            case "00 00 00 0A 01":
-                            case "00 00 00 0A 02":
-                            case "00 00 00 0B 00":
-                            case "00 00 00 0B 01":
-                            case "00 00 00 0B 02":
-                                _dstIp = dstIp.ToString();
-                                lv = new ListViewItem()
-                                {
-                                    Text = (lv_packet_log.Items.Count + 1).ToString(),
-                                    SubItems =
-                                    {
-                                        orientation,
-                                        $"{srcIp}:{srcPort}",
-                                        $"{dstIp}:{dstPort}",
-                                        time.ToString(),
-                                        payload_len.ToString(),
-                                        data,
-                                        tcpPacket.SequenceNumber.ToString(),
-                                        tcpPacket.AcknowledgmentNumber.ToString()
-                                    },
-                                    Tag = new PacketAnalyzer() { HexPayload = data }
-                                };
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    finally
-                    {
-                        ReferenceCountUtil.Release(buf);
-                    }
-                }
-                else
-                {
-                    if (srcIp.ToString() == _dstIp || dstIp.ToString() == _dstIp)
-                    {
-                        lv = new ListViewItem()
-                        {
-                            Text = (lv_packet_log.Items.Count + 1).ToString(),
-                            SubItems =
-                        {
-                            orientation,
-                            $"{srcIp}:{srcPort}",
-                            $"{dstIp}:{dstPort}",
-                            time.ToString(),
-                            payload_len.ToString(),
-                            data,
-                            tcpPacket.SequenceNumber.ToString(),
-                            tcpPacket.AcknowledgmentNumber.ToString()
-                        },
-                            Tag = new PacketAnalyzer() { HexPayload = data }
-                        };
-                    }
-                }
-
-                ThreadSafeUpdate(() =>
-                {
-                    if (lv != null)
-                    {
-                        if (orientation == "Send")
-                        {
-                            lv.ForeColor = Color.Red;
-                        }
-                        else
-                        {
-                            lv.ForeColor = Color.Blue;
-                        }
-                        lv_packet_log.Items.Add(lv);
-                    }
-                });
-            }
-        }
-
-        private void 追踪流ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (lv_packet_log.SelectedItems.Count != 1) return;
-            ListViewItem selected_item = lv_packet_log.SelectedItems[0];
-            string selected_item_seq = selected_item.SubItems[7].Text;
-            string selected_item_ack = selected_item.SubItems[8].Text;
-
-            Console.WriteLine("selected: " + selected_item_seq + " " + selected_item_ack);
-            var pkgs = lv_packet_log.Items;
-            List<string> sends = new List<string>();
-            List<string> recvs = new List<string>();
-            StringBuilder sb_send = new StringBuilder();
-            StringBuilder sb_recv = new StringBuilder();
-            StringBuilder sb_packets = new StringBuilder();
-            foreach (ListViewItem pkg in pkgs)
-            {
-                string index = pkg.Text;
-                string pkg_seq = pkg.SubItems[7].Text;
-                string pkg_ack = pkg.SubItems[8].Text;
-                string data = string.Empty;
-                if (pkg.Tag is PacketAnalyzer analysisPacket)
-                {
-                    data = analysisPacket.HexPayload;
-                }
-                if (pkg_seq == selected_item_ack)
-                {
-                    Console.WriteLine($"recv: {data}");
-                }
-                else if (pkg_ack == selected_item_seq)
-                {
-                    Console.WriteLine($"send: {data}");
-                }
-                // 如果这个recv的包很大，比如收到了3个包，当我们检测到第一个包为recv包后
-                // 需要再查找它余下的包
-                selected_item_seq = pkg_seq;
-                selected_item_ack = pkg_ack;
-                sb_packets.Append(data);
-            }
-            List<byte[]> bytes = new List<byte[]>();
-            List<PacketAnalyzer> analysisPackets = new List<PacketAnalyzer>();
-            var buf = Unpooled.WrappedBuffer(HexUtil.DecodeHex(sb_packets.ToString()));
-
-            try
-            {
-                while (buf.IsReadable())
-                {
-                    int pkg_len = buf.ReadInt();
-                    byte[] tag = new byte[5];
-                    buf.GetBytes(buf.ReaderIndex, tag, 0, 5);
-                    switch (tag.HexDump())
-                    {
-                        case "00 00 00 0A 00":
-                        case "00 00 00 0A 01":
-                        case "00 00 00 0A 02":
-                        case "00 00 00 0B 00":
-                        case "00 00 00 0B 01":
-                        case "00 00 00 0B 02":
-                            byte[] pkg_payload = new byte[pkg_len - 4];
-                            if (buf.ReadableBytes >= pkg_payload.Length)
-                            {
-                                buf.ReadBytes(pkg_payload, 0, pkg_payload.Length);
-                                bytes.Add(pkg_payload);
-                            }
-                            break;
-                        default:
-
-                            break;
-                    }
-                    /*byte[] pkg_payload = new byte[pkg_len - 4];
-                    if (buf.ReadableBytes >= pkg_payload.Length)
-                    {
-                        buf.ReadBytes(pkg_payload, 0, pkg_payload.Length);
-                        bytes.Add(pkg_payload);
-                    }
-                    else
-                    {
-                        Logger.Warn("剩余字节大小不足，请检查追踪的流是否有问题！");
-                        Console.WriteLine(Util.ReadRemainingBytes(buf).HexDump());
-
-                        break;
-                    }*/
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, ex.Message);
-            }
-            foreach (byte[] payload in bytes)
-            {
-                analysisPackets.Add(new PacketAnalyzer()
-                {
-                    Payload = payload
-                });
-            }
-            lv_analysis_log.Items.Clear();
-            foreach (var item in analysisPackets)
-            {
-                try
-                {
-                    item.Deserialize();
-                    Logger.Info(item.ToString());
-                    var lvi = new ListViewItem()
-                    {
-                        Text = item.Orientation,
-                        SubItems =
-                        {
-                            item.ServiceCmd,
-                            item.SSOReq,
-                            (item.Payload.Length + 4).ToString(),
-                            item.HexPayload
-                        }
-                    };
-                    if (item.Orientation == "Send")
-                    {
-                        lvi.BackColor = Color.FromArgb(251, 237, 237);
-                    }
-                    else
-                    {
-                        lvi.BackColor = Color.FromArgb(237, 237, 251);
-                    }
-                    ThreadSafeUpdate(() => lv_analysis_log.Items.Add(lvi));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, ex.Message + " hex: " + item.Payload.HexDump());
-                }
+                RealTimePacketsAnalyzer.ProcessPackets(tcpPacket);
             }
         }
 

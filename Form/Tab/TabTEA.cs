@@ -6,15 +6,15 @@ namespace YgAndroidQQSniffer.Tab
     [Attributes.CustomEvent(nameof(TabTEA))]
     public class TabTEA : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         public void Register()
         {
-            Frm.btn_tea_encrypt.Click += new EventHandler(Btn_tea_encrypt_Click);
-            Frm.btn_tea_decrypt.Click += new EventHandler(Btn_tea_decrypt_Click);
-            Frm.btn_tea_copy_decrypt_data.Click += new EventHandler(Btn_tea_copy_decrypt_data_Click);
-            Frm.btn_tea_key_log_decrypt.Click += new EventHandler(Btn_tea_key_log_decrypt_Click);
-            Frm.btn_decrypt_byte_by_byte.Click += new EventHandler(Btn_decrypt_byte_by_byte_Click);
+            Frm.btn_tea_encrypt.Click += Btn_tea_encrypt_Click;
+            Frm.btn_tea_decrypt.Click += Btn_tea_decrypt_Click;
+            Frm.btn_tea_copy_decrypt_data.Click += Btn_tea_copy_decrypt_data_Click;
+            Frm.btn_tea_key_log_decrypt.Click += Btn_tea_key_log_decrypt_Click;
+            Frm.btn_decrypt_byte_by_byte.Click += Btn_decrypt_byte_by_byte_Click;
         }
 
         #region TAB TEA加解密
@@ -22,30 +22,36 @@ namespace YgAndroidQQSniffer.Tab
         {
             try
             {
-                byte[] key = HexUtil.DecodeHex(Frm.txt_tea_key.Text);
-                byte[] data = HexUtil.DecodeHex(Frm.txt_tea_encrypt_data.Text);
+                byte[] key = Frm.txt_tea_key.Text.DecodeHex();
+                byte[] data = Frm.txt_tea_encrypt_data.Text.DecodeHex();
                 byte[] ret = Tea.Encrypt(data, key);
                 if (ret != null)
                 {
                     Frm.txt_tea_decrypt_data.Text = ret.HexDump();
                 }
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         private void Btn_tea_decrypt_Click(object sender, EventArgs e)
         {
             try
             {
-                byte[] key = HexUtil.DecodeHex(Frm.txt_tea_key.Text);
-                byte[] data = HexUtil.DecodeHex(Frm.txt_tea_encrypt_data.Text);
+                byte[] key = Frm.txt_tea_key.Text.DecodeHex();
+                byte[] data = Frm.txt_tea_encrypt_data.Text.DecodeHex();
                 byte[] ret = Tea.Decrypt(data, key);
                 if (ret != null)
                 {
                     Frm.txt_tea_decrypt_data.Text = ret.HexDump();
                 }
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         private void Btn_tea_copy_decrypt_data_Click(object sender, EventArgs e)
@@ -61,7 +67,7 @@ namespace YgAndroidQQSniffer.Tab
         {
             string encrypt_data = Frm.txt_tea_encrypt_data.Text;
             if (string.IsNullOrEmpty(encrypt_data)) return;
-            byte[] data = HexUtil.DecodeHex(encrypt_data);
+            byte[] data = encrypt_data.DecodeHex();
             byte[] decrypt_data = Common.TeaKeyLogDecrypt(data, out DecryptionKey decryptionKey);
             if (decrypt_data != null)
             {
@@ -74,7 +80,7 @@ namespace YgAndroidQQSniffer.Tab
         {
             string encrypt_data = Frm.txt_tea_encrypt_data.Text.ClearSpecialSymbols();
             if (string.IsNullOrEmpty(encrypt_data)) return;
-            for (int i = 0; i < encrypt_data.Length; i+=2)
+            for (int i = 0; i < encrypt_data.Length; i += 2)
             {
                 byte[] data = encrypt_data.Substring(i, encrypt_data.Length - i).DecodeHex();
                 byte[] decrypt_data = Common.TeaKeyLogDecrypt(data, out DecryptionKey decryptionKey);

@@ -13,14 +13,14 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
     [Attributes.CustomEvent(nameof(CtxMenuPackets))]
     public class CtxMenuPackets : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         public void Register()
         {
-            Frm.copy_choose_payload.Click += new EventHandler(CopyChoosePayload_Click);
-            Frm.copy_whole_payload.Click += new EventHandler(CopyWholePayload_Click);
-            Frm.read_capture_packets_logs.Click += new EventHandler(ReadCapturePacketsLogs_Click);
-            Frm.save_capture_packets_logs.Click += new EventHandler(SaveCapturePacketsLogs_Click);
+            Frm.copy_choose_payload.Click += CopyChoosePayload_Click;
+            Frm.copy_whole_payload.Click += CopyWholePayload_Click;
+            Frm.read_capture_packets_logs.Click += ReadCapturePacketsLogs_Click;
+            Frm.save_capture_packets_logs.Click += SaveCapturePacketsLogs_Click;
         }
 
         #region ctxMenuPackets

@@ -12,25 +12,25 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
     [Attributes.CustomEvent(nameof(CtxMenuAnalysisTools))]
     public class CtxMenuAnalysisTools : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         public void Register()
         {
-            Frm.计算字节数ToolStripMenuItem.Click += new EventHandler(计算字节数ToolStripMenuItem_Click);
-            Frm.TLV格式化ToolStripMenuItem.Click += new EventHandler(TLV格式化ToolStripMenuItem_Click);
-            Frm.选中字节计算换行ToolStripMenuItem.Click += new EventHandler(选中字节计算换行ToolStripMenuItem_Click);
-            Frm.一键格式化ToolStripMenuItem.Click += new EventHandler(一键格式化ToolStripMenuItem_Click);
+            Frm.计算字节数ToolStripMenuItem.Click += 计算字节数ToolStripMenuItem_Click;
+            Frm.TLV格式化ToolStripMenuItem.Click += TLV格式化ToolStripMenuItem_Click;
+            Frm.选中字节计算换行ToolStripMenuItem.Click += 选中字节计算换行ToolStripMenuItem_Click;
+            Frm.一键格式化ToolStripMenuItem.Click += 一键格式化ToolStripMenuItem_Click;
 
-            Frm.十六个0ToolStripMenuItem.Click += new EventHandler(十六个0ToolStripMenuItem_Click);
-            Frm.kEY日志ToolStripMenuItem.Click += new EventHandler(KEY日志ToolStripMenuItem_Click);
+            Frm.十六个0ToolStripMenuItem.Click += 十六个0ToolStripMenuItem_Click;
+            Frm.kEY日志ToolStripMenuItem.Click += KEY日志ToolStripMenuItem_Click;
 
-            Frm.到10进制ToolStripMenuItem1.Click += new EventHandler(到10进制ToolStripMenuItem1_Click);
-            Frm.到文本ToolStripMenuItem.Click += new EventHandler(到文本ToolStripMenuItem_Click);
-            Frm.到QQToolStripMenuItem.Click += new EventHandler(到QQToolStripMenuItem_Click);
-            Frm.Dec到时间ToolStripMenuItem.Click += new EventHandler(Dec到时间ToolStripMenuItem_Click);
-            Frm.Hex到时间ToolStripMenuItem.Click += new EventHandler(Hex到时间ToolStripMenuItem_Click);
-            Frm.Hex到IPToolStripMenuItem.Click += new EventHandler(Hex到IPToolStripMenuItem_Click);
-            Frm.Inflater解压ToolStripMenuItem.Click += new EventHandler(Inflater解压ToolStripMenuItem_Click);
+            Frm.到10进制ToolStripMenuItem1.Click += 到10进制ToolStripMenuItem1_Click;
+            Frm.到文本ToolStripMenuItem.Click += 到文本ToolStripMenuItem_Click;
+            Frm.到QQToolStripMenuItem.Click += 到QQToolStripMenuItem_Click;
+            Frm.Dec到时间ToolStripMenuItem.Click += Dec到时间ToolStripMenuItem_Click;
+            Frm.Hex到时间ToolStripMenuItem.Click += Hex到时间ToolStripMenuItem_Click;
+            Frm.Hex到IPToolStripMenuItem.Click += Hex到IPToolStripMenuItem_Click;
+            Frm.Inflater解压ToolStripMenuItem.Click += Inflater解压ToolStripMenuItem_Click;
         }
 
         #region 计算字节数
@@ -59,7 +59,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
             if (string.IsNullOrEmpty(selected_text)) return;
             try
             {
-                var buf = Unpooled.WrappedBuffer(HexUtil.DecodeHex(selected_text));
+                var buf = Unpooled.WrappedBuffer(selected_text.DecodeHex());
                 string ret = new TLVParser.TLVFormatter().Parse(buf);
                 Frm.Log($"\n{ret}\n");
                 Console.WriteLine(ret);
@@ -84,14 +84,17 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
             int old_length = Frm.r_txt_log.SelectionLength;
             try
             {
-                long calc_len = Util.HexToDec(selected_text);
+                long calc_len = selected_text.HexToDec();
                 Frm.r_txt_log.SelectionStart = ((int)calc_len * 3) + old_start + old_length;
                 Frm.r_txt_log.SelectionLength = 0;
                 Clipboard.SetText(Environment.NewLine + Environment.NewLine);
                 Frm.r_txt_log.Paste();
                 Clipboard.SetText(old_text);
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
         #endregion
 
@@ -100,7 +103,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
         {
             string selected_text = Frm.r_txt_log.Text.ClearSpecialSymbols();
             if (string.IsNullOrEmpty(selected_text)) return;
-            string ret = new PacketFormatter().Parse(Unpooled.WrappedBuffer(HexUtil.DecodeHex(selected_text)));
+            string ret = new PacketFormatter().Parse(Unpooled.WrappedBuffer(selected_text.DecodeHex()));
             Frm.Log("\n\n{0}\n\n", ret);
         }
         #endregion
@@ -111,7 +114,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
         {
             try
             {
-                byte[] data = HexUtil.DecodeHex(Frm.r_txt_log.SelectedText);
+                byte[] data = Frm.r_txt_log.SelectedText.DecodeHex();
                 byte[] decrypt_data = Common.TeaKeyLogDecrypt(data, out DecryptionKey decryptionKey);
                 if (decrypt_data != null)
                 {
@@ -128,7 +131,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
         {
             string selected_text = Frm.r_txt_log.SelectedText.ClearSpecialSymbols();
             if (string.IsNullOrEmpty(selected_text)) return;
-            byte[] decrypt_data = Common.TeaKeyLogDecrypt(HexUtil.DecodeHex(selected_text), out DecryptionKey decryptionKey);
+            byte[] decrypt_data = Common.TeaKeyLogDecrypt(selected_text.DecodeHex(), out DecryptionKey decryptionKey);
             if (decrypt_data != null)
             {
                 Frm.Log(Common.PrettyKeyDecryptDump(decrypt_data, decryptionKey));
@@ -189,7 +192,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
             if (string.IsNullOrEmpty(selected_text)) return;
             try
             {
-                Frm.Log($" //[Time: {Util.UnixTimeStampToDateTime(double.Parse(selected_text))}]");
+                Frm.Log($" //[Time: {double.Parse(selected_text).UnixTimeStampToDateTime()}]");
             }
             catch (Exception ex)
             {
@@ -233,7 +236,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
 
             try
             {
-                using MemoryStream compressedStream = new MemoryStream(HexUtil.DecodeHex(selected_text));
+                using MemoryStream compressedStream = new MemoryStream(selected_text.DecodeHex());
                 using DeflateStream deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
                 using MemoryStream outputStream = new MemoryStream();
                 deflateStream.CopyTo(outputStream);
@@ -245,7 +248,10 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
                     Log($"\n\n[{outputStream.ToArray().HexDump()}]\n\n");
                 }*/
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
         #endregion
     }

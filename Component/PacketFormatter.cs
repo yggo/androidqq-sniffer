@@ -16,7 +16,7 @@ namespace YgAndroidQQSniffer.Component
             ReadPacketLen();
             int packet_type = Buf.ReadInt();
             byte encrypt_type = Buf.ReadByte();
-           
+
             if (packet_type == 0x0A)
             {
                 Sb.Append(packet_type.HexPadLeft().HexDump()).Append(" //packet_type").AppendLine();
@@ -69,7 +69,7 @@ namespace YgAndroidQQSniffer.Component
             }
             return Sb.ToString();
         }
- 
+
         private void ReadPacketLen()
         {
             int packet_len = Buf.ReadInt();
@@ -95,7 +95,7 @@ namespace YgAndroidQQSniffer.Component
             Sb.Append((uin_len + 4).HexPadLeft().HexDump()).Append(" //uin_len").AppendLine();
             Sb.Append(Encoding.UTF8.GetBytes(Uin).HexDump()).Append($" //uin {Uin}").AppendLine();
 
-            byte[] remaining = Util.ReadRemainingBytes(Buf);
+            byte[] remaining = Buf.ReadRemainingBytes();
             Sb.Append(remaining.HexDump()).AppendLine().AppendLine();
 
             byte[] decrypt_data = Common.TeaKeyLogDecrypt(remaining, out DecryptionKey decryptionKey);

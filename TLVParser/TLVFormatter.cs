@@ -9,7 +9,7 @@ namespace YgAndroidQQSniffer.TLVParser
 {
     public class TLVFormatter : IParser
     {
-        private static Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
+        private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
         private static readonly Dictionary<short, IParser> Parsers = new Dictionary<short, IParser>();
 
         public static void RegTLVParsers()
@@ -60,7 +60,7 @@ namespace YgAndroidQQSniffer.TLVParser
         {
             Dictionary<short, byte[]> tlv_map = buf.ReadTLVMap();
             StringBuilder sb = new StringBuilder();
-            sb.Append($"{Util.HexDump(tlv_map.Count.HexPadLeft())} //{tlv_map.Count}tlvs").AppendLine().AppendLine();
+            sb.Append($"{tlv_map.Count.HexPadLeft().HexDump()} //{tlv_map.Count}tlvs").AppendLine().AppendLine();
             tlv_map.ToList().ForEach(tlv =>
             {
                 string text = string.Empty;
@@ -69,7 +69,7 @@ namespace YgAndroidQQSniffer.TLVParser
                 string value = tlv.Value.HexDump();
                 //注册一个map key=tag value=IParser
                 //根据tlv tag到map中找到对应的IParser，存在则调用parse方法，并使用其返回值，否则默认hexDump()
-                var parser = Parsers.Where(p => p.Key == tlv.Key).FirstOrDefault();
+                KeyValuePair<short, IParser> parser = Parsers.FirstOrDefault(p => p.Key == tlv.Key);
                 if (parser.Key != 0 && parser.Value != null)
                 {
                     //parse失败返回原样字节并备注解析失败
@@ -84,7 +84,7 @@ namespace YgAndroidQQSniffer.TLVParser
                             tlv.Value.HexDump());
                     }
                 }
-                if (tlv_map.Where(d => d.Key == tlv.Key).Count() > 1)
+                if (tlv_map.Count(d => d.Key == tlv.Key) > 1)
                 {
                     text += $"{tag} //tlv{tag} 重复的tag {Environment.NewLine}";
                 }

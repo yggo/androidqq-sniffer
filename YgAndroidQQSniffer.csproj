@@ -317,6 +317,8 @@
     <Compile Include="Component\DeviceItem.cs" />
     <Compile Include="Component\PacketAnalyzer.cs" />
     <Compile Include="Component\PacketFormatter.cs" />
+    <Compile Include="Component\PacketLogLVI.cs" />
+    <Compile Include="Component\RealTimePacketsAnalyzer.cs" />
     <Compile Include="Extension\EnumEx.cs" />
     <Compile Include="Extension\MessageBoxEx.cs" />
     <Compile Include="Extension\MyDictionaryComparer.cs" />

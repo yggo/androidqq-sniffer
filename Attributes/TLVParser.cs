@@ -7,7 +7,8 @@ namespace YgAndroidQQSniffer.Attributes
     {
         private readonly short cmd;
 
-        public short Cmd { get { return cmd; } }
+        public short Cmd => cmd;
+
         public TLVParser(short cmd)
         {
             this.cmd = cmd;

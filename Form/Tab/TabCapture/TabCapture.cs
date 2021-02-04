@@ -13,7 +13,7 @@ namespace YgAndroidQQSniffer.Tab.TabCapture
     [Attributes.CustomEvent(nameof(TabCapture))]
     public partial class TabCapture : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         public void Register()
         {

@@ -2,7 +2,7 @@
 {
     public static class HookData
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
 
         #region Hook Data
         public static string _androidId = string.Empty;

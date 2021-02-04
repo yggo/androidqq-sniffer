@@ -7,7 +7,7 @@ namespace YgAndroidQQSniffer.Attributes
     {
         private readonly string windowName;
 
-        public string WindowName { get { return windowName; } }
+        public string WindowName => windowName;
 
         public CustomEvent(string windowName)
         {

@@ -46,12 +46,12 @@ namespace YgAndroidQQSniffer
         {
             decryptionKey = null;
             List<DecryptionKey> keys = Keys.ToList();
-            for (int i = 0; i < keys.Count; i++)
+            foreach (DecryptionKey t in keys)
             {
-                var d = Tea.Decrypt(In, HexUtil.DecodeHex(keys[i].Key));
+                var d = Tea.Decrypt(In, t.Key.DecodeHex());
                 if (d != null)
                 {
-                    decryptionKey = keys[i];
+                    decryptionKey = t;
                     return d;
                 }
             }

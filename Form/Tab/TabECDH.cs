@@ -6,14 +6,15 @@ namespace YgAndroidQQSniffer.Tab
     [Attributes.CustomEvent(nameof(TabECDH))]
     public class TabECDH : ICustomControlEvents
     {
-        private static FormMain Frm { get => FormMain.Form; }
+        private static FormMain Frm => FormMain.Form;
+
         public void Register()
         {
-            Frm.btnClientGenKeys.Click += new EventHandler(BtnClientGenKeys_Click);
-            Frm.btnServerGenKeys.Click += new EventHandler(BtnServerGenKeys_Click);
-            Frm.btnExchangePubkey.Click += new EventHandler(BtnExchangePubkey_Click);
-            Frm.btnClientGenShakey.Click += new EventHandler(BtnClientGenShakey_Click);
-            Frm.btnServerGenShakey.Click += new EventHandler(BtnServerGenShakey_Click);
+            Frm.btnClientGenKeys.Click += BtnClientGenKeys_Click;
+            Frm.btnServerGenKeys.Click += BtnServerGenKeys_Click;
+            Frm.btnExchangePubkey.Click += BtnExchangePubkey_Click;
+            Frm.btnClientGenShakey.Click += BtnClientGenShakey_Click;
+            Frm.btnServerGenShakey.Click += BtnServerGenShakey_Click;
         }
 
         private void BtnClientGenKeys_Click(object sender, EventArgs e)

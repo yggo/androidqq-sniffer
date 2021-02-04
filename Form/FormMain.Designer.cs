@@ -134,6 +134,7 @@
             this.btn_tool_read_keys = new System.Windows.Forms.Button();
             this.txt_tool_keys = new System.Windows.Forms.TextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btn_decrypt_byte_by_byte = new System.Windows.Forms.Button();
             this.btn_tea_key_log_decrypt = new System.Windows.Forms.Button();
             this.btn_tea_copy_decrypt_data = new System.Windows.Forms.Button();
             this.btn_tea_decrypt = new System.Windows.Forms.Button();
@@ -168,12 +169,11 @@
             this.Orientation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SrcIp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.DstIp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.time = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.CaptureTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.PayloadLen = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.PayloadData = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.r_txt_log = new System.Windows.Forms.RichTextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.btn_decrypt_byte_by_byte = new System.Windows.Forms.Button();
             this.ctxMenuStrip_analysis_tools.SuspendLayout();
             this.ctxMenuStrip_packets.SuspendLayout();
             this.ctxMenuStrip_trace_flow.SuspendLayout();
@@ -1138,6 +1138,15 @@
             this.tabPage4.Text = "TEA加解密";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // btn_decrypt_byte_by_byte
+            // 
+            this.btn_decrypt_byte_by_byte.Location = new System.Drawing.Point(804, 8);
+            this.btn_decrypt_byte_by_byte.Name = "btn_decrypt_byte_by_byte";
+            this.btn_decrypt_byte_by_byte.Size = new System.Drawing.Size(121, 23);
+            this.btn_decrypt_byte_by_byte.TabIndex = 10;
+            this.btn_decrypt_byte_by_byte.Text = "逐字节KEY日志解密";
+            this.btn_decrypt_byte_by_byte.UseVisualStyleBackColor = true;
+            // 
             // btn_tea_key_log_decrypt
             // 
             this.btn_tea_key_log_decrypt.Location = new System.Drawing.Point(693, 8);
@@ -1424,7 +1433,7 @@
             this.Orientation,
             this.SrcIp,
             this.DstIp,
-            this.time,
+            this.CaptureTime,
             this.PayloadLen,
             this.PayloadData});
             this.lv_packet_log.ContextMenuStrip = this.ctxMenuStrip_packets;
@@ -1457,10 +1466,10 @@
             this.DstIp.Text = "目的地址";
             this.DstIp.Width = 120;
             // 
-            // time
+            // CaptureTime
             // 
-            this.time.Text = "捕获时间";
-            this.time.Width = 126;
+            this.CaptureTime.Text = "捕获时间";
+            this.CaptureTime.Width = 126;
             // 
             // PayloadLen
             // 
@@ -1499,15 +1508,6 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1128, 609);
             this.tabControl1.TabIndex = 7;
-            // 
-            // btn_decrypt_byte_by_byte
-            // 
-            this.btn_decrypt_byte_by_byte.Location = new System.Drawing.Point(804, 8);
-            this.btn_decrypt_byte_by_byte.Name = "btn_decrypt_byte_by_byte";
-            this.btn_decrypt_byte_by_byte.Size = new System.Drawing.Size(121, 23);
-            this.btn_decrypt_byte_by_byte.TabIndex = 10;
-            this.btn_decrypt_byte_by_byte.Text = "逐字节KEY日志解密";
-            this.btn_decrypt_byte_by_byte.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -1629,7 +1629,7 @@
         private System.Windows.Forms.ColumnHeader Orientation;
         private System.Windows.Forms.ColumnHeader SrcIp;
         private System.Windows.Forms.ColumnHeader DstIp;
-        private System.Windows.Forms.ColumnHeader time;
+        private System.Windows.Forms.ColumnHeader CaptureTime;
         private System.Windows.Forms.ColumnHeader PayloadLen;
         private System.Windows.Forms.ColumnHeader PayloadData;
         private System.Windows.Forms.TabControl tabControl1;
