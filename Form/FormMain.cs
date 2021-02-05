@@ -1,4 +1,13 @@
-﻿using DotNetty.Buffers;
+﻿/*
+ *  Copyright 2021-2021 yggo Technologies and contributors.
+ *
+ *  此源代码的使用受 GNU AFFERO GENERAL PUBLIC LICENSE version 3 许可证的约束, 可以在以下链接找到该许可证.
+ *  Use of this source code is governed by the GNU AGPLv3 license that can be found through the following link.
+ *
+ *  https://github.com/yggo/androidqq-sniffer/blob/main/LICENSE
+ */
+
+using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
 using NLog;
 using SharpPcap;
@@ -182,6 +191,7 @@ namespace YgAndroidQQSniffer
 
         private void Btn_Auto_Analysis_Click(object sender, EventArgs e)
         {
+            //TODO 实时包分析器已实现自动组包，优化这里的分析策略
             StringBuilder sb_all = new StringBuilder();
             foreach (ListViewItem item in lv_packet_log.Items)
             {
@@ -232,16 +242,7 @@ namespace YgAndroidQQSniffer
                 }
                 foreach (byte[] payload in bytes)
                 {
-                    //TODO 优化这里的捕获时间
                     string capture_time = string.Empty;
-                    /*foreach (ListViewItem item in listView_packet_log.Items)
-                    {
-                        if (payload.HexDump().Contains(item.SubItems[6].Text))
-                        {
-                            capture_time = item.SubItems[4].Text;
-                            break;
-                        }
-                    }*/
                     analysisPackets.Add(new PacketAnalyzer()
                     {
                         Payload = payload,
@@ -354,6 +355,5 @@ namespace YgAndroidQQSniffer
             string ret = new PbFormatter().Parse(Unpooled.WrappedBuffer(HexUtil.DecodeHex(selected_text)));
             Log($"\n[\n{ret}\n]\n");
         }
-
     }
 }

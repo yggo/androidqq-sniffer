@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("YgAndroidQQSniffer")]
-[assembly: AssemblyCopyright("Copyright ©  2020 QQ3151543536")]
+[assembly: AssemblyCopyright("Copyright ©  2021 QQ3151543536")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
