@@ -157,7 +157,7 @@ namespace YgAndroidQQSniffer.Component
         private readonly byte[] ANDROIDQQ_PROTOCOL_MARK4 = { 0x00, 0x00, 0x00, 0x0B, 0x00 };
         private readonly byte[] ANDROIDQQ_PROTOCOL_MARK5 = { 0x00, 0x00, 0x00, 0x0B, 0x01 };
         private readonly byte[] ANDROIDQQ_PROTOCOL_MARK6 = { 0x00, 0x00, 0x00, 0x0B, 0x02 };
-        private bool IsAndroidQQProtocol(IByteBuffer buffer)
+        public bool IsAndroidQQProtocol(IByteBuffer buffer)
         {
             if (buffer.ReadableBytes < 9) return false;
             byte[] tag = new byte[5];

@@ -8,7 +8,6 @@
  */
 
 using DotNetty.Buffers;
-using DotNetty.Common.Utilities;
 using NLog;
 using SharpPcap;
 using SharpPcap.LibPcap;
@@ -16,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using YgAndroidQQSniffer.Component;
@@ -53,11 +51,11 @@ namespace YgAndroidQQSniffer
             lv_packet_log
               .GetType()
               .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-              .SetValue(lv_packet_log, true, null);
+              ?.SetValue(lv_packet_log, true, null);
             lv_analysis_log
                 .GetType()
                 .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .SetValue(lv_packet_log, true, null);
+                ?.SetValue(lv_packet_log, true, null);
         }
 
         private void RegCustomEvents()
@@ -91,14 +89,11 @@ namespace YgAndroidQQSniffer
         #endregion
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Device != null)
+            if (Device != null && Device.Started)
             {
-                if (Device.Started)
-                {
-                    Logger.Info(Device.Statistics.ToString());
-                    Device.StopCapture();
-                    Device.Close();
-                }
+                Logger.Info(Device.Statistics.ToString());
+                Device.StopCapture();
+                Device.Close();
             }
         }
 
@@ -191,104 +186,59 @@ namespace YgAndroidQQSniffer
 
         private void Btn_Auto_Analysis_Click(object sender, EventArgs e)
         {
-            //TODO 实时包分析器已实现自动组包，优化这里的分析策略
-            StringBuilder sb_all = new StringBuilder();
-            foreach (ListViewItem item in lv_packet_log.Items)
+            List<PacketAnalyzer> analysisPackets = new List<PacketAnalyzer>();
+            ListViewItem[] currentItems = new ListViewItem[lv_packet_log.Items.Count];
+            lv_packet_log.Items.CopyTo(currentItems, 0);
+            lv_analysis_log.Items.Clear();
+
+            foreach (ListViewItem item in currentItems)
             {
-                if (item.Tag is PacketAnalyzer analysisPacket)
+                string captureTime = item.SubItems[4].Text;
+                byte[] payload = item.SubItems[6].Text.DecodeHex();
+                IByteBuffer buffer = Unpooled.WrappedBuffer(payload);
+                if (RealTimePacketsAnalyzer.IsAndroidQQProtocol(buffer))
                 {
-                    sb_all.Append(analysisPacket.HexPayload);
+                    int pkgLen = buffer.GetInt(buffer.ReaderIndex);
+                    byte[] pkgPayload = new byte[pkgLen];
+                    if (buffer.ReadableBytes >= pkgPayload.Length)
+                    {
+                        buffer.ReadBytes(pkgPayload, 0, pkgPayload.Length);
+                        analysisPackets.Add(new PacketAnalyzer()
+                        {
+                            Payload = payload,
+                            CaptureTime = captureTime,
+                            HexPayload = item.SubItems[6].Text
+                        });
+                    }
                 }
             }
-            if (string.IsNullOrEmpty(sb_all.ToString())) return;
-            List<byte[]> bytes = new List<byte[]>();
-            List<PacketAnalyzer> analysisPackets = new List<PacketAnalyzer>();
 
-            var buf = Unpooled.WrappedBuffer(HexUtil.DecodeHex(sb_all.ToString()));
-
-            try
+            foreach (PacketAnalyzer item in analysisPackets)
             {
                 try
                 {
-                    while (buf.IsReadable())
+                    item.Deserialize();
+                    Logger.Info(item.ToString());
+                    var lvi = new ListViewItem
                     {
-                        byte[] tag = new byte[5];
-                        buf.GetBytes(buf.ReaderIndex + 4, tag, 0, 5);
-                        switch (tag.HexDump())
+                        Text = item.Orientation,
+                        SubItems =
                         {
-                            case "00 00 00 0A 00":
-                            case "00 00 00 0A 01":
-                            case "00 00 00 0A 02":
-                            case "00 00 00 0B 00":
-                            case "00 00 00 0B 01":
-                            case "00 00 00 0B 02":
-                                int pkg_len = buf.GetInt(buf.ReaderIndex);
-                                byte[] pkg_payload = new byte[pkg_len];
-                                if (buf.ReadableBytes >= pkg_payload.Length)
-                                {
-                                    buf.ReadBytes(pkg_payload, 0, pkg_payload.Length);
-                                    bytes.Add(pkg_payload);
-                                }
-                                break;
-                            default:
-                                buf.ReadBytes(9);
-                                break;
-                        }
-                    }
+                            item.ServiceCmd,
+                            item.SSOReq,
+                            item.Payload.Length.ToString(),
+                            item.CaptureTime,
+                            item.HexPayload
+                        },
+                        Tag = item,
+                        ForeColor = item.Orientation == "Send" ? Color.Red : Color.Blue
+                    };
+                    ThreadSafeUpdate(() => lv_analysis_log.Items.Add(lvi));
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, ex.Message);
+                    Logger.Error(ex, ex.Message + " hex: " + item.HexPayload);
                 }
-                foreach (byte[] payload in bytes)
-                {
-                    string capture_time = string.Empty;
-                    analysisPackets.Add(new PacketAnalyzer()
-                    {
-                        Payload = payload,
-                        CaptureTime = capture_time
-                        //read capture time 
-                    });
-                }
-                lv_analysis_log.Items.Clear();
-                foreach (var item in analysisPackets)
-                {
-                    try
-                    {
-                        item.Deserialize();
-                        Logger.Info(item.ToString());
-                        var lvi = new ListViewItem()
-                        {
-                            Text = item.Orientation,
-                            SubItems =
-                            {
-                                item.ServiceCmd,
-                                item.SSOReq,
-                                item.Payload.Length.ToString(),
-                                item.CaptureTime,
-                                item.HexPayload
-                            },
-                            Tag = new PacketAnalyzer { HexPayload = item.HexPayload }
-                        };
-                        if (item.Orientation == "Send")
-                        {
-                            lvi.ForeColor = Color.Red;
-                        }
-                        else
-                        {
-                            lvi.ForeColor = Color.Blue;
-                        }
-                        ThreadSafeUpdate(() => lv_analysis_log.Items.Add(lvi));
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, ex.Message + " hex: " + item.Payload.HexDump());
-                    }
-                }
-            }
-            finally
-            {
-                ReferenceCountUtil.Release(buf);
             }
         }
 
@@ -314,7 +264,7 @@ namespace YgAndroidQQSniffer
             {
                 try
                 {
-                    Device.OnPacketArrival -= new PacketArrivalEventHandler(Device_OnPacketArrival);
+                    Device.OnPacketArrival -= Device_OnPacketArrival;
                     Device.StopCapture();
                     Device.Close();
                 }
